@@ -555,7 +555,7 @@ const commands = [
       if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       const level = interaction.options.getInteger('level', true);
       queue.setVolume(level);
-      const bar = 'â–ˆ'.repeat(Math.round(level/10)) + 'â–''.repeat(15 - Math.round(level/10));
+      const bar = '█'.repeat(Math.round(level/10)) + '░'.repeat(15 - Math.round(level/10));
       const emoji = level === 0 ? '🔇' : level < 50 ? '🔉' : '🔊';
       await interaction.reply({ embeds: [simple(`${emoji} Volume → **${level}%**\n\`${bar}\``, C.blurple)] });
     },
