@@ -71,7 +71,7 @@ const FileStore = require('session-file-store')(session);
 const axios   = require('axios');
 
 const app  = express();
-const PORT = 5113;
+const PORT = 5000;
 const DASHBOARD_URL = 'https://dash.aqmusic.app';
 const DISCORD_API   = 'https://discord.com/api/v10';
 
