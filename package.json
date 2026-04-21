@@ -1,0 +1,28 @@
+{
+  "name": "audioquack",
+  "version": "2.0.0",
+  "description": "🦆 AudioQuack — Modern Discord music bot, no ffmpeg required",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.2",
+    "axios": "^1.15.1",
+    "discord.js": "^14.26.3",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "express-recaptcha": "^5.1.0",
+    "express-session": "^1.19.0",
+    "libsodium-wrappers": "^0.8.3",
+    "react-google-recaptcha": "^3.1.0",
+    "react-google-recaptcha-v3": "^1.11.0",
+    "session-file-store": "^1.5.0",
+    "youtube-dl-exec": "^3.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
