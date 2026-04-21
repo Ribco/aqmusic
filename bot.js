@@ -14,9 +14,9 @@ const youtubedl = require('youtube-dl-exec');
 const { spawn } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  SAFETY CONFIG
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const SAFETY = {
   MAX_AGE_LIMIT: 18,
   BLOCKED_CATEGORIES: [
@@ -38,33 +38,33 @@ function safetyCheck(info) {
   if (!info) return { blocked: false };
 
   if (info.age_limit && info.age_limit >= SAFETY.MAX_AGE_LIMIT)
-    return { blocked: true, reason: `ðŸ”ž Age-restricted content (${info.age_limit}+) is not allowed.` };
+    return { blocked: true, reason: `🔞 Age-restricted content (${info.age_limit}+) is not allowed.` };
 
   if (info.is_nsfw === true)
-    return { blocked: true, reason: 'ðŸš« NSFW content is not allowed.' };
+    return { blocked: true, reason: '🚫 NSFW content is not allowed.' };
 
   const cats = [...(info.categories || []), ...(info.tags || [])].map(c => c.toLowerCase());
   for (const blocked of SAFETY.BLOCKED_CATEGORIES)
     if (cats.some(c => c.includes(blocked)))
-      return { blocked: true, reason: `ðŸš« Blocked category: \`${blocked}\`` };
+      return { blocked: true, reason: `🚫 Blocked category: \`${blocked}\`` };
 
   const titleLower = (info.title || '').toLowerCase();
   const descLower  = (info.description || '').toLowerCase();
   for (const kw of SAFETY.BLOCKED_KEYWORDS)
     if (titleLower.includes(kw) || descLower.includes(kw))
-      return { blocked: true, reason: 'ðŸš« Blocked keyword detected in video metadata.' };
+      return { blocked: true, reason: '🚫 Blocked keyword detected in video metadata.' };
 
   const dur = info.duration || 0;
   if (SAFETY.MAX_DURATION > 0 && dur > SAFETY.MAX_DURATION)
-    return { blocked: true, reason: `â± Video too long. Max is ${Math.floor(SAFETY.MAX_DURATION/3600)}h.` };
+    return { blocked: true, reason: `⏱ Video too long. Max is ${Math.floor(SAFETY.MAX_DURATION/3600)}h.` };
   if (dur > 0 && dur < SAFETY.MIN_DURATION)
-    return { blocked: true, reason: 'â± Video is too short to be valid.' };
+    return { blocked: true, reason: '⏱ Video is too short to be valid.' };
 
   return { blocked: false };
 }
 
 
-// â”€â”€ Express / Dashboard deps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Express / Dashboard deps ──────────────────────────────────────────────────
 const express = require('express');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -82,9 +82,9 @@ function getUser(id) {
   return userStore.get(id);
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  COLORS & EMBEDS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const C = { gold: 0xf5a623, green: 0x43b581, red: 0xf04747, dark: 0x2f3136, blurple: 0x5865f2 };
 const base   = (color = C.gold) => new EmbedBuilder().setColor(color).setFooter({ text: 'AudioQuack - Best way to Quack your Music' });
 const simple = (desc, color = C.blurple) => base(color).setDescription(desc);
@@ -99,14 +99,14 @@ function fmtSecs(secs) {
 
 function embedNowPlaying(track, queue) {
   const e = base(C.gold)
-    .setAuthor({ name: 'ðŸ¦†  Now Playing' })
+    .setAuthor({ name: '🦆  Now Playing' })
     .setTitle(track.title.length > 60 ? track.title.slice(0,57)+'...' : track.title)
     .setURL(track.url)
     .addFields(
-      { name: 'ðŸŽ¤ Artist',   value: track.author || 'Unknown', inline: true },
-      { name: 'â± Duration', value: fmtSecs(track.duration),   inline: true },
-      { name: 'ðŸ”¢ In Queue', value: `${queue.tracks.length} track${queue.tracks.length !== 1 ? 's' : ''}`, inline: true },
-      { name: '\u200b', value: `\`${'â”€'.repeat(16)}\`\n\`0:00 / ${fmtSecs(track.duration)}\`` },
+      { name: '🎤 Artist',   value: track.author || 'Unknown', inline: true },
+      { name: '⏱ Duration', value: fmtSecs(track.duration),   inline: true },
+      { name: '🔢 In Queue', value: `${queue.tracks.length} track${queue.tracks.length !== 1 ? 's' : ''}`, inline: true },
+      { name: '\u200b', value: `\`${'─'.repeat(16)}\`\n\`0:00 / ${fmtSecs(track.duration)}\`` },
     ).setTimestamp();
   if (track.thumbnail) e.setThumbnail(track.thumbnail);
   return e;
@@ -114,13 +114,13 @@ function embedNowPlaying(track, queue) {
 
 function embedTrackAdded(track, pos) {
   const e = base(C.green)
-    .setAuthor({ name: 'ðŸŽµ  Added to Queue' })
+    .setAuthor({ name: '🎵  Added to Queue' })
     .setTitle(track.title.length > 60 ? track.title.slice(0,57)+'...' : track.title)
     .setURL(track.url)
     .addFields(
-      { name: 'ðŸŽ¤ Artist',   value: track.author || 'Unknown', inline: true },
-      { name: 'â± Duration', value: fmtSecs(track.duration),   inline: true },
-      { name: 'ðŸ“ Position', value: `#${pos}`,                 inline: true },
+      { name: '🎤 Artist',   value: track.author || 'Unknown', inline: true },
+      { name: '⏱ Duration', value: fmtSecs(track.duration),   inline: true },
+      { name: '📍 Position', value: `#${pos}`,                 inline: true },
     );
   if (track.thumbnail) e.setThumbnail(track.thumbnail);
   return e;
@@ -130,21 +130,21 @@ function embedQueue(queue, page = 0) {
   const perPage = 10, pages = Math.max(1, Math.ceil(queue.tracks.length / perPage));
   const lines = queue.tracks
     .slice(page * perPage, (page + 1) * perPage)
-    .map((t, i) => `\`${page * perPage + i + 1}.\` **${t.title.slice(0,45)}** â€” ${t.author} \`${fmtSecs(t.duration)}\``);
+    .map((t, i) => `\`${page * perPage + i + 1}.\` **${t.title.slice(0,45)}** — ${t.author} \`${fmtSecs(t.duration)}\``);
   const embed = base(C.gold)
-    .setAuthor({ name: `ðŸŽµ  Queue  â€¢  Page ${page + 1}/${pages}` })
+    .setAuthor({ name: `🎵  Queue  •  Page ${page + 1}/${pages}` })
     .setDescription(lines.join('\n') || '*Queue is empty.*')
-    .setFooter({ text: `${queue.tracks.length} track${queue.tracks.length !== 1 ? 's' : ''} in queue  â€¢  AudioQuack` });
+    .setFooter({ text: `${queue.tracks.length} track${queue.tracks.length !== 1 ? 's' : ''} in queue  •  AudioQuack` });
   if (queue.current) embed.addFields({
-    name: 'ðŸ¦†  Now Playing',
-    value: `**${queue.current.title.slice(0,60)}** â€” ${queue.current.author} \`${fmtSecs(queue.current.duration)}\``,
+    name: '🦆  Now Playing',
+    value: `**${queue.current.title.slice(0,60)}** — ${queue.current.author} \`${fmtSecs(queue.current.duration)}\``,
   });
   return embed;
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  YT-DLP HELPERS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
 const baseFlags = () => {
   const f = { noWarnings: true, skipDownload: true, dumpSingleJson: true };
@@ -162,7 +162,7 @@ async function searchTracks(query, limit = 5) {
 
     if (result.id && !result.entries) {
       const check = safetyCheck(result);
-      if (check.blocked) return [];  // single video blocked â€” return nothing
+      if (check.blocked) return [];  // single video blocked — return nothing
       return [{
         title: result.title || 'Unknown', author: result.uploader || result.channel || 'Unknown',
         duration: result.duration || 0, url: result.webpage_url || result.url || query,
@@ -206,16 +206,16 @@ function createResource(streamUrl, volume = 0.8) {
   return resource;
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  VOICE CHANNEL STATUS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 async function setVCStatus(voiceChannel, status) {
   try { await voiceChannel.client.rest.put(`/channels/${voiceChannel.id}/voice-status`, { body: { status } }); } catch {}
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  DJ ROLE SYSTEM (persisted to djroles.json)
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const DJ_ROLES_PATH = path.join(__dirname, 'djroles.json');
 const djRoles = new Map();
 
@@ -223,8 +223,8 @@ if (fs.existsSync(DJ_ROLES_PATH)) {
   try {
     const saved = JSON.parse(fs.readFileSync(DJ_ROLES_PATH, 'utf8'));
     for (const [guildId, roleId] of Object.entries(saved)) djRoles.set(guildId, roleId);
-    console.log('âœ… DJ roles loaded');
-  } catch { console.error('âŒ Failed to load djroles.json'); }
+    console.log('✅ DJ roles loaded');
+  } catch { console.error('❌ Failed to load djroles.json'); }
 }
 
 function saveDJRoles() {
@@ -238,13 +238,13 @@ function isDJ(interaction) {
 }
 function djOnly(interaction) {
   if (isDJ(interaction)) return true;
-  interaction.reply({ embeds: [simple('âŒ You need the **DJ role** to use this command!', C.red)], ephemeral: true });
+  interaction.reply({ embeds: [simple('❌ You need the **DJ role** to use this command!', C.red)], ephemeral: true });
   return false;
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  QUEUE MANAGER
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const queues = new Map();
 
 class GuildQueue {
@@ -279,7 +279,7 @@ class GuildQueue {
       if (this._destroyed) return;
       console.error('Player error:', err.message);
       this._killFfmpeg();
-      this.textChannel.send({ embeds: [simple(`âŒ Playback error: \`${err.message?.slice(0,200)}\``, C.red)] });
+      this.textChannel.send({ embeds: [simple(`❌ Playback error: \`${err.message?.slice(0,200)}\``, C.red)] });
       this.current = null;
       this.loading = false;
       this._next();
@@ -330,10 +330,10 @@ class GuildQueue {
           this.connection.subscribe(this.player);
           await entersState(this.connection, VoiceConnectionStatus.Ready, 15_000);
           this._destroyed = false;
-          this.textChannel.send({ embeds: [simple('ðŸ”„ Reconnected! Queue has been cleared.', C.gold)] });
+          this.textChannel.send({ embeds: [simple('🔄 Reconnected! Queue has been cleared.', C.gold)] });
         } catch {
           this.destroy();
-          this.textChannel.send({ embeds: [simple('âŒ Could not reconnect to voice channel.', C.red)] });
+          this.textChannel.send({ embeds: [simple('❌ Could not reconnect to voice channel.', C.red)] });
         }
       }
     });
@@ -363,7 +363,7 @@ class GuildQueue {
           u.history = [track, ...u.history.filter(t => t.url !== track.url)].slice(0, 50);
         }
       } else {
-        this.textChannel.send({ embeds: [simple('ðŸ“¢ Ad Break!', C.gold)] });
+        this.textChannel.send({ embeds: [simple('📢 Ad Break!', C.gold)] });
       }
     } catch (err) {
       if (this._destroyed) return;
@@ -371,7 +371,7 @@ class GuildQueue {
       const isBlocked = err.message?.startsWith('BLOCKED:');
       const msg = isBlocked
         ? err.message.replace('BLOCKED:', '')
-        : `âŒ Could not stream **${track.title}**`;
+        : `❌ Could not stream **${track.title}**`;
       this.textChannel.send({ embeds: [simple(msg, C.red)] });
       this.current = null;
       this.loading = false;
@@ -383,7 +383,7 @@ class GuildQueue {
     if (this._destroyed) return;
     if (!this.tracks.length) {
       setVCStatus(this.voiceChannel, '');
-      this.textChannel.send({ embeds: [simple('âœ… Queue finished. Use **/play** to add more!', C.dark)] });
+      this.textChannel.send({ embeds: [simple('✅ Queue finished. Use **/play** to add more!', C.dark)] });
       setTimeout(() => { if (!this._destroyed && !this.isActive()) this.destroy(); }, 30_000);
       return;
     }
@@ -391,7 +391,7 @@ class GuildQueue {
 
     if (Math.random() < AD_CHANCE) {
       const adTrack = {
-        title: 'ðŸ¦† AudioQuack Ad',
+        title: '🦆 AudioQuack Ad',
         author: 'AudioQuack',
         duration: 0,
         url: AD_URL,
@@ -425,20 +425,20 @@ class GuildQueue {
   }
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  DISCORD CLIENT
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages],
 });
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  SLASH COMMANDS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const commands = [
   {
     data: new SlashCommandBuilder()
-      .setName('dj').setDescription('ðŸŽ§ Manage the DJ role')
+      .setName('dj').setDescription('🎧 Manage the DJ role')
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
       .addSubcommand(s => s.setName('set').setDescription('Set the DJ role').addRoleOption(o => o.setName('role').setDescription('The DJ role').setRequired(true)))
       .addSubcommand(s => s.setName('remove').setDescription('Remove the DJ role restriction'))
@@ -449,23 +449,23 @@ const commands = [
         const role = interaction.options.getRole('role', true);
         djRoles.set(interaction.guild.id, role.id);
         saveDJRoles();
-        return interaction.reply({ embeds: [simple(`âœ… DJ role set to ${role}!`, C.green)] });
+        return interaction.reply({ embeds: [simple(`✅ DJ role set to ${role}!`, C.green)] });
       }
       if (sub === 'remove') {
         djRoles.delete(interaction.guild.id);
         saveDJRoles();
-        return interaction.reply({ embeds: [simple('âœ… DJ role removed.', C.green)] });
+        return interaction.reply({ embeds: [simple('✅ DJ role removed.', C.green)] });
       }
       const djRoleId = djRoles.get(interaction.guild.id);
-      if (!djRoleId) return interaction.reply({ embeds: [simple('â„¹ï¸ No DJ role set.', C.blurple)] });
+      if (!djRoleId) return interaction.reply({ embeds: [simple('ℹ️ No DJ role set.', C.blurple)] });
       const role = interaction.guild.roles.cache.get(djRoleId);
-      return interaction.reply({ embeds: [simple(`ðŸŽ§ Current DJ role: ${role ?? 'Unknown (deleted?)'}`, C.gold)] });
+      return interaction.reply({ embeds: [simple(`🎧 Current DJ role: ${role ?? 'Unknown (deleted?)'}`, C.gold)] });
     },
   },
 
   {
     data: new SlashCommandBuilder()
-      .setName('play').setDescription('ðŸŽµ Plays a Song via AQ')
+      .setName('play').setDescription('🎵 Plays a Song via AQ')
       .addStringOption(o => o.setName('query').setDescription('Song name or YouTube URL').setRequired(true).setAutocomplete(true)),
     async autocomplete(interaction) {
       const query = interaction.options.getFocused();
@@ -473,7 +473,7 @@ const commands = [
       try {
         const results = await searchTracks(query, 8);
         await interaction.respond(results.slice(0,25).map(t => ({
-          name: `${t.title.slice(0,50)} â€” ${t.author} [${fmtSecs(t.duration)}]`.slice(0,100),
+          name: `${t.title.slice(0,50)} — ${t.author} [${fmtSecs(t.duration)}]`.slice(0,100),
           value: t.url,
         })));
       } catch { await interaction.respond([]); }
@@ -481,102 +481,102 @@ const commands = [
     async execute(interaction) {
       await interaction.deferReply();
       const vc = interaction.member?.voice?.channel;
-      if (!vc) return interaction.editReply({ embeds: [simple('âŒ Join a voice channel first!', C.red)] });
+      if (!vc) return interaction.editReply({ embeds: [simple('❌ Join a voice channel first!', C.red)] });
       const query = interaction.options.getString('query', true);
       const results = await searchTracks(query, 1);
-      if (!results.length) return interaction.editReply({ embeds: [simple(`âŒ No results for **${query}**`, C.red)] });
+      if (!results.length) return interaction.editReply({ embeds: [simple(`❌ No results for **${query}**`, C.red)] });
       const found = results[0];
       let queue = queues.get(interaction.guild.id);
       if (!queue) {
         queue = new GuildQueue(interaction.guild.id, vc, interaction.channel);
         queues.set(interaction.guild.id, queue);
         try { await queue.connect(); }
-        catch { queues.delete(interaction.guild.id); return interaction.editReply({ embeds: [simple('âŒ Could not join your voice channel!', C.red)] }); }
+        catch { queues.delete(interaction.guild.id); return interaction.editReply({ embeds: [simple('❌ Could not join your voice channel!', C.red)] }); }
       }
       queue.addTrack(found, interaction.user.id);
       if (!queue.isActive() || (!queue.current && !queue.loading)) await queue.start();
       const isFirst = queue.tracks.length === 0 && (queue.current?.url === found.url || queue.loading);
       await interaction.editReply({
-        embeds: [isFirst ? simple(`ðŸ” Loading **${found.title}**â€¦`, C.blurple) : embedTrackAdded(found, queue.tracks.length)],
+        embeds: [isFirst ? simple(`🔍 Loading **${found.title}**…`, C.blurple) : embedTrackAdded(found, queue.tracks.length)],
       });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('skip').setDescription('â­ Skip the current track'),
+    data: new SlashCommandBuilder().setName('skip').setDescription('⏭ Skip the current track'),
     async execute(interaction) {
       const queue = queues.get(interaction.guild.id);
-      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       queue.skip();
-      await interaction.reply({ embeds: [simple('â­ Skipped!', C.green)] });
+      await interaction.reply({ embeds: [simple('⏭ Skipped!', C.green)] });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('pause').setDescription('â¸ Pause playback'),
+    data: new SlashCommandBuilder().setName('pause').setDescription('⏸ Pause playback'),
     async execute(interaction) {
       const queue = queues.get(interaction.guild.id);
-      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
-      if (queue.isPaused()) return interaction.reply({ embeds: [simple('âš ï¸ Already paused.', C.dark)], ephemeral: true });
+      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
+      if (queue.isPaused()) return interaction.reply({ embeds: [simple('⚠️ Already paused.', C.dark)], ephemeral: true });
       queue.pause();
-      await interaction.reply({ embeds: [simple('â¸ Paused.', C.blurple)] });
+      await interaction.reply({ embeds: [simple('⏸ Paused.', C.blurple)] });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('resume').setDescription('â–¶ï¸ Resume playback'),
+    data: new SlashCommandBuilder().setName('resume').setDescription('▶️ Resume playback'),
     async execute(interaction) {
       const queue = queues.get(interaction.guild.id);
-      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
-      if (!queue.isPaused()) return interaction.reply({ embeds: [simple('âš ï¸ Not paused.', C.dark)], ephemeral: true });
+      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue.isPaused()) return interaction.reply({ embeds: [simple('⚠️ Not paused.', C.dark)], ephemeral: true });
       queue.resume();
-      await interaction.reply({ embeds: [simple('â–¶ï¸ Resumed!', C.green)] });
+      await interaction.reply({ embeds: [simple('▶️ Resumed!', C.green)] });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('stop').setDescription('â¹ Stop and clear queue'),
+    data: new SlashCommandBuilder().setName('stop').setDescription('⏹ Stop and clear queue'),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
-      if (!queue) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       queue.destroy();
-      await interaction.reply({ embeds: [simple('â¹ Stopped and cleared the queue.', C.dark)] });
+      await interaction.reply({ embeds: [simple('⏹ Stopped and cleared the queue.', C.dark)] });
     },
   },
 
   {
     data: new SlashCommandBuilder()
-      .setName('volume').setDescription('ðŸ”Š Set the volume')
-      .addIntegerOption(o => o.setName('level').setDescription('0â€“150').setRequired(true).setMinValue(0).setMaxValue(150)),
+      .setName('volume').setDescription('🔊 Set the volume')
+      .addIntegerOption(o => o.setName('level').setDescription('0–150').setRequired(true).setMinValue(0).setMaxValue(150)),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
-      if (!queue) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       const level = interaction.options.getInteger('level', true);
       queue.setVolume(level);
-      const bar = 'â–ˆ'.repeat(Math.round(level/10)) + 'â–‘'.repeat(15 - Math.round(level/10));
-      const emoji = level === 0 ? 'ðŸ”‡' : level < 50 ? 'ðŸ”‰' : 'ðŸ”Š';
-      await interaction.reply({ embeds: [simple(`${emoji} Volume â†’ **${level}%**\n\`${bar}\``, C.blurple)] });
+      const bar = 'â–ˆ'.repeat(Math.round(level/10)) + 'â–''.repeat(15 - Math.round(level/10));
+      const emoji = level === 0 ? '🔇' : level < 50 ? '🔉' : '🔊';
+      await interaction.reply({ embeds: [simple(`${emoji} Volume → **${level}%**\n\`${bar}\``, C.blurple)] });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('nowplaying').setDescription('ðŸŽµ Show current track'),
+    data: new SlashCommandBuilder().setName('nowplaying').setDescription('🎵 Show current track'),
     async execute(interaction) {
       const queue = queues.get(interaction.guild.id);
-      if (!queue?.current) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue?.current) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       await interaction.reply({ embeds: [embedNowPlaying(queue.current, queue)] });
     },
   },
 
   {
     data: new SlashCommandBuilder()
-      .setName('queue').setDescription('ðŸ“‹ View the queue')
+      .setName('queue').setDescription('📋 View the queue')
       .addIntegerOption(o => o.setName('page').setDescription('Page number').setMinValue(1)),
     async execute(interaction) {
       const queue = queues.get(interaction.guild.id);
-      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue?.isActive()) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       const perPage = 10, total = Math.max(1, Math.ceil(queue.tracks.length / perPage));
       let page = Math.min((interaction.options.getInteger('page') ?? 1) - 1, total - 1);
       const buildRow = p => new ActionRowBuilder().addComponents(
@@ -597,73 +597,73 @@ const commands = [
   },
 
   {
-    data: new SlashCommandBuilder().setName('shuffle').setDescription('ðŸ”€ Shuffle the queue'),
+    data: new SlashCommandBuilder().setName('shuffle').setDescription('🔀 Shuffle the queue'),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
-      if (!queue || queue.tracks.length < 2) return interaction.reply({ embeds: [simple('âš ï¸ Need 2+ tracks to shuffle.', C.dark)], ephemeral: true });
+      if (!queue || queue.tracks.length < 2) return interaction.reply({ embeds: [simple('⚠️ Need 2+ tracks to shuffle.', C.dark)], ephemeral: true });
       for (let i = queue.tracks.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [queue.tracks[i], queue.tracks[j]] = [queue.tracks[j], queue.tracks[i]];
       }
-      await interaction.reply({ embeds: [simple(`ðŸ”€ Shuffled **${queue.tracks.length}** tracks!`, C.green)] });
+      await interaction.reply({ embeds: [simple(`🔀 Shuffled **${queue.tracks.length}** tracks!`, C.green)] });
     },
   },
 
   {
     data: new SlashCommandBuilder()
-      .setName('loop').setDescription('ðŸ” Set loop mode')
+      .setName('loop').setDescription('🔁 Set loop mode')
       .addStringOption(o => o.setName('mode').setDescription('Loop mode').setRequired(true)
-        .addChoices({ name: 'ðŸš« Off', value: 'off' }, { name: 'ðŸ”‚ Track', value: 'track' }, { name: 'ðŸ” Queue', value: 'queue' })),
+        .addChoices({ name: '🚫 Off', value: 'off' }, { name: '🔂 Track', value: 'track' }, { name: '🔁 Queue', value: 'queue' })),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
-      if (!queue) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       const m = interaction.options.getString('mode', true);
       queue.loop = m;
-      const label = { off: 'ðŸš« Loop **disabled**', track: 'ðŸ”‚ Looping **current track**', queue: 'ðŸ”‚ Looping **entire queue**' };
+      const label = { off: '🚫 Loop **disabled**', track: '🔂 Looping **current track**', queue: '🔂 Looping **entire queue**' };
       await interaction.reply({ embeds: [simple(label[m], C.blurple)] });
     },
   },
 
   {
     data: new SlashCommandBuilder()
-      .setName('remove').setDescription('ðŸ—‘ Remove a track')
+      .setName('remove').setDescription('🗑 Remove a track')
       .addIntegerOption(o => o.setName('position').setDescription('Queue position').setRequired(true).setMinValue(1)),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
-      if (!queue) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+      if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
       const pos = interaction.options.getInteger('position', true) - 1;
-      if (pos >= queue.tracks.length) return interaction.reply({ embeds: [simple(`âŒ Position **${pos+1}** out of range.`, C.red)], ephemeral: true });
+      if (pos >= queue.tracks.length) return interaction.reply({ embeds: [simple(`❌ Position **${pos+1}** out of range.`, C.red)], ephemeral: true });
       const [removed] = queue.tracks.splice(pos, 1);
-      await interaction.reply({ embeds: [simple(`ðŸ—‘ Removed **${removed.title}**`, C.green)] });
+      await interaction.reply({ embeds: [simple(`🗑 Removed **${removed.title}**`, C.green)] });
     },
   },
 
   {
-    data: new SlashCommandBuilder().setName('disconnect').setDescription('ðŸ‘‹ Disconnect from voice'),
+    data: new SlashCommandBuilder().setName('disconnect').setDescription('👋 Disconnect from voice'),
     async execute(interaction) {
       if (!djOnly(interaction)) return;
       const queue = queues.get(interaction.guild.id);
       const botInVC = interaction.guild.members.me?.voice?.channel;
-      if (!queue && !botInVC) return interaction.reply({ embeds: [simple("âŒ I'm not in a voice channel!", C.red)], ephemeral: true });
+      if (!queue && !botInVC) return interaction.reply({ embeds: [simple("❌ I'm not in a voice channel!", C.red)], ephemeral: true });
       if (queue) queue.destroy();
       if (!queue && botInVC) try { interaction.guild.members.me.voice.disconnect(); } catch {}
-      await interaction.reply({ embeds: [simple('ðŸ‘‹ Disconnected. See you next time!', C.dark)] });
+      await interaction.reply({ embeds: [simple('👋 Disconnected. See you next time!', C.dark)] });
     },
   },   
   {
   data: new SlashCommandBuilder()
     .setName('seek')
-    .setDescription('â© Seek to a position in the current track')
+    .setDescription('⏩ Seek to a position in the current track')
     .addIntegerOption(o => o.setName('seconds').setDescription('Position in seconds').setRequired(true).setMinValue(0)),
   async execute(interaction) {
     const queue = queues.get(interaction.guild.id);
-    if (!queue?.current) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+    if (!queue?.current) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
     const secs = interaction.options.getInteger('seconds', true);
     if (queue.current.duration > 0 && secs >= queue.current.duration)
-      return interaction.reply({ embeds: [simple(`âŒ Track is only **${fmtSecs(queue.current.duration)}** long.`, C.red)], ephemeral: true });
+      return interaction.reply({ embeds: [simple(`❌ Track is only **${fmtSecs(queue.current.duration)}** long.`, C.red)], ephemeral: true });
     await interaction.deferReply();
     try {
       const streamUrl = await getStreamUrl(queue.current.url);
@@ -677,53 +677,53 @@ const commands = [
       resource._ffmpeg = ffmpeg;
       queue._res = resource;
       queue.player.play(resource);
-      await interaction.editReply({ embeds: [simple(`â© Seeked to **${fmtSecs(secs)}**`, C.blurple)] });
+      await interaction.editReply({ embeds: [simple(`⏩ Seeked to **${fmtSecs(secs)}**`, C.blurple)] });
     } catch (err) {
       console.error('Seek error:', err.message);
-      await interaction.editReply({ embeds: [simple('âŒ Failed to seek.', C.red)] });
+      await interaction.editReply({ embeds: [simple('❌ Failed to seek.', C.red)] });
     }
   },
 },
     {
   data: new SlashCommandBuilder()
     .setName('clearqueue')
-    .setDescription('ðŸ—‘ Clear the queue without stopping current track'),
+    .setDescription('🗑 Clear the queue without stopping current track'),
   async execute(interaction) {
     if (!djOnly(interaction)) return;
     const queue = queues.get(interaction.guild.id);
-    if (!queue) return interaction.reply({ embeds: [simple('âŒ Nothing is playing!', C.red)], ephemeral: true });
+    if (!queue) return interaction.reply({ embeds: [simple('❌ Nothing is playing!', C.red)], ephemeral: true });
     const count = queue.tracks.length;
-    if (!count) return interaction.reply({ embeds: [simple('âš ï¸ Queue is already empty.', C.dark)], ephemeral: true });
+    if (!count) return interaction.reply({ embeds: [simple('⚠️ Queue is already empty.', C.dark)], ephemeral: true });
     queue.tracks = [];
-    await interaction.reply({ embeds: [simple(`ðŸ—‘ Cleared **${count}** track${count !== 1 ? 's' : ''} from the queue.`, C.green)] });
+    await interaction.reply({ embeds: [simple(`🗑 Cleared **${count}** track${count !== 1 ? 's' : ''} from the queue.`, C.green)] });
   },
 },
     {
   data: new SlashCommandBuilder()
     .setName('move')
-    .setDescription('â†•ï¸ Move a track to a different position')
+    .setDescription('↕️ Move a track to a different position')
     .addIntegerOption(o => o.setName('from').setDescription('Current position').setRequired(true).setMinValue(1))
     .addIntegerOption(o => o.setName('to').setDescription('New position').setRequired(true).setMinValue(1)),
   async execute(interaction) {
     if (!djOnly(interaction)) return;
     const queue = queues.get(interaction.guild.id);
-    if (!queue || !queue.tracks.length) return interaction.reply({ embeds: [simple('âŒ Queue is empty!', C.red)], ephemeral: true });
+    if (!queue || !queue.tracks.length) return interaction.reply({ embeds: [simple('❌ Queue is empty!', C.red)], ephemeral: true });
     const from = interaction.options.getInteger('from', true) - 1;
     const to   = interaction.options.getInteger('to',   true) - 1;
     const len  = queue.tracks.length;
-    if (from >= len) return interaction.reply({ embeds: [simple(`âŒ Position **${from+1}** out of range.`, C.red)], ephemeral: true });
-    if (to   >= len) return interaction.reply({ embeds: [simple(`âŒ Position **${to+1}** out of range.`, C.red)], ephemeral: true });
-    if (from === to) return interaction.reply({ embeds: [simple('âš ï¸ Already in that position.', C.dark)], ephemeral: true });
+    if (from >= len) return interaction.reply({ embeds: [simple(`❌ Position **${from+1}** out of range.`, C.red)], ephemeral: true });
+    if (to   >= len) return interaction.reply({ embeds: [simple(`❌ Position **${to+1}** out of range.`, C.red)], ephemeral: true });
+    if (from === to) return interaction.reply({ embeds: [simple('⚠️ Already in that position.', C.dark)], ephemeral: true });
     const [track] = queue.tracks.splice(from, 1);
     queue.tracks.splice(to, 0, track);
-    await interaction.reply({ embeds: [simple(`â†•ï¸ Moved **${track.title.slice(0,50)}** from #${from+1} to #${to+1}`, C.green)] });
+    await interaction.reply({ embeds: [simple(`↕️ Moved **${track.title.slice(0,50)}** from #${from+1} to #${to+1}`, C.green)] });
   },
 },
 ];
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  SHARED HTML SHELL
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 function escHtml(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -762,7 +762,7 @@ a:hover{opacity:.8}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-/* â”€â”€ TOPBAR â”€â”€ */
+/* ── TOPBAR ── */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;height:56px;flex-shrink:0;
@@ -781,10 +781,10 @@ a:hover{opacity:.8}
 .logout-btn{font-size:.8rem;color:var(--muted);padding:6px 12px;border:1px solid var(--border);border-radius:6px;transition:all .2s}
 .logout-btn:hover{color:var(--text);border-color:var(--border2);opacity:1}
 
-/* â”€â”€ LAYOUT â”€â”€ */
+/* ── LAYOUT ── */
 
 
-/* â”€â”€ SIDEBAR â”€â”€ */
+/* ── SIDEBAR ── */
 .sidebar{
   width:220px;flex-shrink:0;
   background:var(--sidebar-bg);
@@ -805,16 +805,16 @@ a:hover{opacity:.8}
 .nav-item .icon{width:16px;text-align:center;font-size:1rem;flex-shrink:0}
 .sidebar-divider{height:1px;background:var(--border);margin:10px 0}
 
-/* â”€â”€ MAIN â”€â”€ */
+/* ── MAIN ── */
 
 
-/* â”€â”€ CARDS â”€â”€ */
+/* ── CARDS ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;}
 .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.02em;color:var(--text)}
 .card-body{padding:20px}
 
-/* â”€â”€ NOW PLAYING â”€â”€ */
+/* ── NOW PLAYING ── */
 .np-card{background:linear-gradient(135deg,#1a1200 0%,var(--surface) 60%);border:1px solid var(--gold-mid)}
 .np-inner{display:flex;align-items:center;gap:20px;padding:20px}
 .np-thumb{width:88px;height:88px;border-radius:10px;object-fit:cover;background:var(--surface2);flex-shrink:0;box-shadow:0 8px 24px #0008}
@@ -843,7 +843,7 @@ a:hover{opacity:.8}
 .vol-row span{font-size:.75rem;color:var(--muted);min-width:36px}
 input[type=range]{accent-color:var(--gold);width:110px;cursor:pointer}
 
-/* â”€â”€ QUEUE LIST â”€â”€ */
+/* ── QUEUE LIST ── */
 .q-list{list-style:none}
 .q-item{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);transition:background .15s}
 .q-item:last-child{border-bottom:none}
@@ -856,7 +856,7 @@ input[type=range]{accent-color:var(--gold);width:110px;cursor:pointer}
 .q-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;border-radius:4px;transition:all .15s}
 .q-remove:hover{background:#ef444422;color:var(--red)}
 
-/* â”€â”€ SEARCH / RESULTS â”€â”€ */
+/* ── SEARCH / RESULTS ── */
 .search-wrap{display:flex;gap:8px}
 .search-input{
   flex:1;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);
@@ -879,11 +879,11 @@ input[type=range]{accent-color:var(--gold);width:110px;cursor:pointer}
 .r-actions button:last-child{background:var(--surface);color:var(--muted2);border:1px solid var(--border)}
 .r-actions button:hover{opacity:.8}
 
-/* â”€â”€ YT PLAYER â”€â”€ */
+/* ── YT PLAYER ── */
 .yt-wrap{display:flex;gap:8px;margin-bottom:12px}
 .yt-frame{width:100%;aspect-ratio:16/9;border:none;border-radius:10px;background:#000}
 
-/* â”€â”€ GUILD GRID â”€â”€ */
+/* ── GUILD GRID ── */
 .guild-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
 .guild-card{
   background:var(--surface);border:1px solid var(--border);border-radius:12px;
@@ -895,7 +895,7 @@ input[type=range]{accent-color:var(--gold);width:110px;cursor:pointer}
 .guild-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;line-height:1.3}
 .guild-status{margin-top:6px}
 
-/* â”€â”€ HISTORY / LIKED GRID â”€â”€ */
+/* ── HISTORY / LIKED GRID ── */
 .track-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
 .t-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:all .2s}
 .t-card:hover{border-color:var(--border2);transform:translateY(-2px)}
@@ -909,19 +909,19 @@ input[type=range]{accent-color:var(--gold);width:110px;cursor:pointer}
 .t-actions a:hover,.t-actions button:hover{border-color:var(--border2);color:var(--text);opacity:1}
 .t-actions button.unlike-btn:hover{background:#ef444422;color:var(--red);border-color:#ef444433}
 
-/* â”€â”€ PAGE HEADER â”€â”€ */
+/* ── PAGE HEADER ── */
 .page-header{display:flex;flex-direction:column;gap:4px}
 .page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-.03em}
 .page-sub{font-size:.85rem;color:var(--muted)}
 
-/* â”€â”€ LOOP SELECT â”€â”€ */
+/* ── LOOP SELECT ── */
 select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer}
 select:focus{outline:none;border-color:var(--gold)}
 
-/* â”€â”€ EMPTY â”€â”€ */
+/* ── EMPTY ── */
 .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:.9rem}
 
-/* â”€â”€ LOGIN â”€â”€ */
+/* ── LOGIN ── */
 .login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;text-align:center;padding:20px}
 .login-duck{font-size:5rem;animation:bob 2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
@@ -930,7 +930,7 @@ select:focus{outline:none;border-color:var(--gold)}
 .login-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--blurple);color:#fff;border-radius:10px;font-weight:600;font-size:.95rem;font-family:'Syne',sans-serif;transition:all .2s;margin-top:4px}
 .login-btn:hover{opacity:.85;transform:translateY(-2px);box-shadow:0 8px 24px #5865f240;color:#fff}
 
-/* â”€â”€ SCROLLABLE COLS â”€â”€ */
+/* ── SCROLLABLE COLS ── */
 .two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}.sidebar{display:none}}
 </style>
@@ -942,11 +942,11 @@ function shell(title, body, user = null, activePage = '') {
   const sidebar = user ? `
     <aside class="sidebar">
       <div class="sidebar-section">Navigation</div>
-      ${navItem('/dashboard','ðŸ ','Servers','dashboard')}
-      ${navItem('/history','ðŸ“œ','History','history')}
-      ${navItem('/liked','â™¥','Liked Songs','liked')}
-      ${navItem('/terms','ðŸ“„','Terms of Service','terms')}
-      ${navItem('/privacy','ðŸ”’','Privacy Policy','privacy')}   ${navItem('/docs','ðŸ“ƒ','Documentations','docs')}
+      ${navItem('/dashboard','🏠','Servers','dashboard')}
+      ${navItem('/history','📜','History','history')}
+      ${navItem('/liked','♥','Liked Songs','liked')}
+      ${navItem('/terms','📄','Terms of Service','terms')}
+      ${navItem('/privacy','🔒','Privacy Policy','privacy')}   ${navItem('/docs','📃','Documentations','docs')}
       <div class="sidebar-divider"></div>
       <div class="sidebar-section">Links</div>
       <a href="https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot+applications.commands&permissions=4820673477601296" target="_blank" class="nav-item"><span class="icon">âž•</span>Add Bot</a>
@@ -979,9 +979,9 @@ ${GLOBAL_CSS}
 </body></html>`;
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  EXPRESS DASHBOARD
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -1042,7 +1042,7 @@ function getBotGuilds(userGuilds) {
   return userGuilds.filter(g => client.guilds.cache.has(g.id));
 }
 
-// â”€â”€ Landing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Landing ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   res.send(`<!DOCTYPE html>
@@ -1068,7 +1068,7 @@ ${FAVICON}
 ${GLOBAL_CSS}
 </head><body style="overflow:auto">
 <div class="login-wrap">
-  <div class="login-duck">ðŸ¦†</div>
+  <div class="login-duck">🦆</div>
   <div class="login-title">AudioQuack</div>
   <div class="login-sub">Your Discord music bot dashboard. Control queues, browse history, and vibe with your server.</div>
   <a href="/login" class="login-btn">Login with Discord</a>
@@ -1076,7 +1076,7 @@ ${GLOBAL_CSS}
 </body></html>`);
 });
 
-// â”€â”€ Server list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Server list ───────────────────────────────────────────────────────────────
 app.get('/dashboard', requireAuth, (req, res) => { 
   const user = req.session.user;
   const botGuilds = getBotGuilds(user.guilds || []);
@@ -1085,7 +1085,7 @@ app.get('/dashboard', requireAuth, (req, res) => {
       ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
       : `https://cdn.discordapp.com/embed/avatars/0.png`;
     const queue = queues.get(g.id);
-    const badge = queue?.isActive() ? `<div class="guild-status"><span class="pill pill-gold">ðŸŽµ Playing</span></div>` : '';
+    const badge = queue?.isActive() ? `<div class="guild-status"><span class="pill pill-gold">🎵 Playing</span></div>` : '';
     return `<a href="/server/${g.id}" class="guild-card">
       <img class="guild-icon" src="${iconUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
       <div class="guild-name">${escHtml(g.name)}</div>
@@ -1119,11 +1119,11 @@ app.get('/dashboard', requireAuth, (req, res) => {
 <script src="https://www.scoplidrop.com/embed/widget.js" data-giveaway="E2LDCDJ" data-mode="modal"></script>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">ðŸ“º YouTube Player</span>
+        <span class="card-title">📺 YouTube Player</span>
       </div>
       <div class="card-body">
         <div class="yt-wrap">
-          <input class="search-input" type="text" id="yt-url" placeholder="Paste a YouTube URL to watchâ€¦" style="flex:1">
+          <input class="search-input" type="text" id="yt-url" placeholder="Paste a YouTube URL to watch…" style="flex:1">
           <button class="ctrl-btn btn-surface" onclick="loadYT()">Load</button>
         </div>
         <div id="yt-container"><div class="empty" style="padding:60px">Paste a YouTube link above to watch it here</div></div>
@@ -1143,7 +1143,7 @@ app.get('/dashboard', requireAuth, (req, res) => {
   `, user, 'dashboard'));
 });
 
-// â”€â”€ Server dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Server dashboard ──────────────────────────────────────────────────────────
 app.get('/server/:guildId', requireAuth, (req, res) => {
   const user = req.session.user;
   const guild = client.guilds.cache.get(req.params.guildId);
@@ -1158,25 +1158,25 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
     <div class="np-inner">
       ${queue.current.thumbnail
         ? `<img class="np-thumb" src="${escHtml(queue.current.thumbnail)}">`
-        : `<div class="np-thumb-placeholder">ðŸŽµ</div>`}
+        : `<div class="np-thumb-placeholder">🎵</div>`}
       <div class="np-info">
         <div class="np-label">Now Playing</div>
         <div class="np-title">${escHtml(queue.current.title)}</div>
         <div class="np-author">${escHtml(queue.current.author)}</div>
         <div class="np-meta">
           <span class="pill pill-gold">${fmtSecs(queue.current.duration)}</span>
-          ${queue.loop !== 'off' ? `<span class="pill pill-muted">ðŸ” ${queue.loop}</span>` : ''}
-          ${djRole ? `<span class="pill pill-muted">ðŸŽ§ DJ: ${escHtml(djRole.name)}</span>` : ''}
+          ${queue.loop !== 'off' ? `<span class="pill pill-muted">🔁 ${queue.loop}</span>` : ''}
+          ${djRole ? `<span class="pill pill-muted">🎧 DJ: ${escHtml(djRole.name)}</span>` : ''}
         </div>
         <div class="controls">
-          <button class="ctrl-btn btn-surface" onclick="api('pause')">â¸ Pause</button>
-          <button class="ctrl-btn btn-surface" onclick="api('resume')">â–¶ï¸ Resume</button>
-          <button class="ctrl-btn btn-gold" onclick="api('skip')">â­ Skip</button>
-          <button class="ctrl-btn btn-red" onclick="api('stop')">â¹ Stop</button>
-          <button class="ctrl-btn btn-surface" onclick="api('disconnect')">ðŸ‘‹ DC</button>
+          <button class="ctrl-btn btn-surface" onclick="api('pause')">⏸ Pause</button>
+          <button class="ctrl-btn btn-surface" onclick="api('resume')">▶️ Resume</button>
+          <button class="ctrl-btn btn-gold" onclick="api('skip')">⏭ Skip</button>
+          <button class="ctrl-btn btn-red" onclick="api('stop')">⏹ Stop</button>
+          <button class="ctrl-btn btn-surface" onclick="api('disconnect')">👋 DC</button>
         </div>
         <div class="vol-row">
-          <span>ðŸ”Š</span>
+          <span>🔊</span>
           <input type="range" min="0" max="150" value="${Math.round(queue.volume * 100)}" oninput="setVolume(this.value)">
           <span id="vol-label">${Math.round(queue.volume * 100)}%</span>
         </div>
@@ -1191,15 +1191,15 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
           ${t.thumbnail ? `<img class="q-thumb" src="${escHtml(t.thumbnail)}">` : '<div class="q-thumb"></div>'}
           <div class="q-meta">
             <div class="q-title">${escHtml(t.title)}</div>
-            <div class="q-sub">${escHtml(t.author)} â€¢ ${fmtSecs(t.duration)}</div>
+            <div class="q-sub">${escHtml(t.author)} • ${fmtSecs(t.duration)}</div>
           </div>
-          <button class="q-remove" onclick="removeTrack(${i+1})" title="Remove">âœ•</button>
+          <button class="q-remove" onclick="removeTrack(${i+1})" title="Remove">✕</button>
         </li>`).join('')}
       ${queue.tracks.length > 20 ? `<li class="q-item" style="justify-content:center;color:var(--muted);font-size:.8rem">+${queue.tracks.length - 20} more tracks</li>` : ''}
     </ul>` : `<div class="empty">Queue is empty.</div>`;
 
   const loopOptions = ['off','track','queue'].map(v =>
-    `<option value="${v}" ${queue?.loop === v ? 'selected' : ''}>${v === 'off' ? 'ðŸš« Off' : v === 'track' ? 'ðŸ”‚ Track' : 'ðŸ” Queue'}</option>`
+    `<option value="${v}" ${queue?.loop === v ? 'selected' : ''}>${v === 'off' ? '🚫 Off' : v === 'track' ? '🔂 Track' : '🔁 Queue'}</option>`
   ).join('');
 
   res.send(shell(guild.name, `
@@ -1212,11 +1212,11 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
         <div class="card np-card">${npHtml}</div>
         <div class="card">
           <div class="card-header">
-            <span class="card-title">ðŸ” Search &amp; Play</span>
+            <span class="card-title">🔍 Search &amp; Play</span>
           </div>
           <div class="card-body">
             <div class="search-wrap">
-              <input class="search-input" type="text" id="search-input" placeholder="Search YouTube or paste URLâ€¦">
+              <input class="search-input" type="text" id="search-input" placeholder="Search YouTube or paste URL…">
               <button class="ctrl-btn btn-gold" onclick="search()">Search</button>
             </div>
             <div id="search-results"></div>
@@ -1224,11 +1224,11 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
         </div>
         <div class="card">
           <div class="card-header">
-            <span class="card-title">ðŸ“º YouTube Player</span>
+            <span class="card-title">📺 YouTube Player</span>
           </div>
           <div class="card-body">
             <div class="yt-wrap">
-              <input class="search-input" type="text" id="yt-url" placeholder="Paste a YouTube URLâ€¦">
+              <input class="search-input" type="text" id="yt-url" placeholder="Paste a YouTube URL…">
               <button class="ctrl-btn btn-surface" onclick="loadYT()">Load</button>
             </div>
             <div id="yt-container"></div>
@@ -1238,10 +1238,10 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
       <div style="display:flex;flex-direction:column;gap:20px">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">ðŸ“‹ Queue ${queue?.tracks.length ? `<span class="pill pill-gold" style="margin-left:6px">${queue.tracks.length}</span>` : ''}</span>
+            <span class="card-title">📋 Queue ${queue?.tracks.length ? `<span class="pill pill-gold" style="margin-left:6px">${queue.tracks.length}</span>` : ''}</span>
             <div style="display:flex;gap:8px;align-items:center">
               <select onchange="setLoop(this.value)">${loopOptions}</select>
-              <button class="ctrl-btn btn-surface" style="padding:6px 10px;font-size:.75rem" onclick="api('shuffle')">ðŸ”€</button>
+              <button class="ctrl-btn btn-surface" style="padding:6px 10px;font-size:.75rem" onclick="api('shuffle')">🔀</button>
             </div>
           </div>
           ${queueHtml}
@@ -1267,7 +1267,7 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
       async function search() {
         const q = document.getElementById('search-input').value.trim();
         if (!q) return;
-        document.getElementById('search-results').innerHTML = '<div class="empty">Searchingâ€¦</div>';
+        document.getElementById('search-results').innerHTML = '<div class="empty">Searching…</div>';
         const r = await fetch('/api/search?q=' + encodeURIComponent(q));
         const tracks = await r.json();
         const el = document.getElementById('search-results');
@@ -1282,7 +1282,7 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
             </div>
             <div class="r-actions">
               <button onclick="playTrack('\${encodeURIComponent(t.url)}','\${encodeURIComponent(t.title)}')">â–¶ Play</button>
-              <button onclick="likeTrack(\${JSON.stringify(JSON.stringify(t))})">â™¥</button>
+              <button onclick="likeTrack(\${JSON.stringify(JSON.stringify(t))})">♥</button>
             </div>
           </div>
         \`).join('') + '</div>';
@@ -1294,14 +1294,14 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
           body: JSON.stringify({ url: decodeURIComponent(url) })
         });
         const d = await r.json();
-        alert(d.ok ? 'ðŸŽµ Added: ' + decodeURIComponent(title) : d.error || 'Error');
+        alert(d.ok ? '🎵 Added: ' + decodeURIComponent(title) : d.error || 'Error');
         location.reload();
       }
       async function likeTrack(trackJson) {
         const track = JSON.parse(trackJson);
         const r = await fetch('/api/like', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(track) });
         const d = await r.json();
-        alert(d.ok ? 'â™¥ Liked!' : d.error || 'Error');
+        alert(d.ok ? '♥ Liked!' : d.error || 'Error');
       }
       function loadYT() {
         const url = document.getElementById('yt-url').value.trim();
@@ -1316,7 +1316,7 @@ app.get('/server/:guildId', requireAuth, (req, res) => {
   `, user, ''));
 });
 
-// â”€â”€ History â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── History ───────────────────────────────────────────────────────────────────
 app.get('/history', requireAuth, (req, res) => {
   const user = req.session.user;
   const u = getUser(user.id);
@@ -1334,14 +1334,14 @@ app.get('/history', requireAuth, (req, res) => {
     </div>`).join('') : `<div class="empty" style="grid-column:1/-1">No history yet. Play some songs in Discord first!</div>`;
   res.send(shell('History', `
     <div class="page-header">
-      <div class="page-title">ðŸ“œ History</div>
+      <div class="page-title">📜 History</div>
       <div class="page-sub">Last 50 tracks you played</div>
     </div>
     <div class="track-grid">${cards}</div>
   `, user, 'history'));
 });
 
-// â”€â”€ Liked Songs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Liked Songs ───────────────────────────────────────────────────────────────
 app.get('/liked', requireAuth, (req, res) => {
   const user = req.session.user;
   const u = getUser(user.id);
@@ -1355,12 +1355,12 @@ app.get('/liked', requireAuth, (req, res) => {
       </div>
       <div class="t-actions">
         <a href="${escHtml(t.url)}" target="_blank">â–¶ Open on YouTube</a>
-        <button class="unlike-btn" onclick="unlike('${encodeURIComponent(t.url)}')">âœ• Unlike</button>
+        <button class="unlike-btn" onclick="unlike('${encodeURIComponent(t.url)}')">✕ Unlike</button>
       </div>
     </div>`).join('') : `<div class="empty" style="grid-column:1/-1">No liked songs yet. Like tracks from the server dashboard!</div>`;
   res.send(shell('Liked Songs', `
     <div class="page-header">
-      <div class="page-title">â™¥ Liked Songs</div>
+      <div class="page-title">♥ Liked Songs</div>
       <div class="page-sub">${u.liked.length} liked track${u.liked.length !== 1 ? 's' : ''}</div>
     </div>
     <div class="track-grid">${cards}</div>
@@ -1373,9 +1373,9 @@ app.get('/liked', requireAuth, (req, res) => {
   `, user, 'liked'));
 });
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  API ROUTES
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 app.get('/api/search', requireAuth, async (req, res) => {
   const q = req.query.q;
   if (!q) return res.json([]);
@@ -1410,7 +1410,7 @@ if (DJ_ONLY_ACTIONS.includes(action)) {
   const djRoleId = djRoles.get(guildId);
   const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator);
   const hasDJ = !djRoleId || member.roles.cache.has(djRoleId);
-  if (!isAdmin && !hasDJ) return res.json({ ok: false, error: 'âŒ You need the DJ role to do that.' });
+  if (!isAdmin && !hasDJ) return res.json({ ok: false, error: '❌ You need the DJ role to do that.' });
 }
   const queue = queues.get(guildId);
   try {
@@ -1462,7 +1462,7 @@ if (DJ_ONLY_ACTIONS.includes(action)) {
     res.json({ ok: false, error: err.message });
   }
 });
-// â”€â”€ Terms of Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Terms of Service ──────────────────────────────────────────────────────────
 app.get('/terms', (req, res) => {
   res.send(shell('Terms of Service', `
     <div class="page-header">
@@ -1539,7 +1539,7 @@ app.get('/terms', (req, res) => {
   `, req.session.user ?? null, ''));
 });
 
-// â”€â”€ Privacy Policy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Privacy Policy ────────────────────────────────────────────────────────────
 app.get('/privacy', (req, res) => {
   res.send(shell('Privacy Policy', `
     <meta name="google-adsense-account" content="ca-pub-5874101786045442">
@@ -1559,12 +1559,12 @@ app.get('/privacy', (req, res) => {
           <div class="card-title" style="margin-bottom:8px">2. Information We Collect</div>
           <p>We collect only the minimum information necessary to provide the service:</p>
           <ul style="margin-top:8px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
-            <li><strong style="color:var(--text)">Discord User ID, username & avatar</strong> â€” collected via Discord OAuth2 when you log into the dashboard, used solely to display your profile and identify your session</li>
-            <li><strong style="color:var(--text)">Server (guild) list</strong> â€” fetched from Discord to show which servers you share with the bot; not stored permanently</li>
-            <li><strong style="color:var(--text)">Playback history</strong> â€” tracks you play through the bot are stored in memory to power the History feature; this data is lost on bot restart</li>
-            <li><strong style="color:var(--text)">Liked songs</strong> â€” tracks you like via the dashboard are stored in memory per-user; also lost on restart</li>
-            <li><strong style="color:var(--text)">DJ role settings</strong> â€” server-specific DJ role configurations are saved to disk (<code style="background:var(--surface2);padding:1px 5px;border-radius:3px">djroles.json</code>) to persist across restarts</li>
-            <li><strong style="color:var(--text)">Session data</strong> â€” login sessions are stored in files on the server to keep you logged into the dashboard for up to 1 year unless you log out</li>
+            <li><strong style="color:var(--text)">Discord User ID, username & avatar</strong> — collected via Discord OAuth2 when you log into the dashboard, used solely to display your profile and identify your session</li>
+            <li><strong style="color:var(--text)">Server (guild) list</strong> — fetched from Discord to show which servers you share with the bot; not stored permanently</li>
+            <li><strong style="color:var(--text)">Playback history</strong> — tracks you play through the bot are stored in memory to power the History feature; this data is lost on bot restart</li>
+            <li><strong style="color:var(--text)">Liked songs</strong> — tracks you like via the dashboard are stored in memory per-user; also lost on restart</li>
+            <li><strong style="color:var(--text)">DJ role settings</strong> — server-specific DJ role configurations are saved to disk (<code style="background:var(--surface2);padding:1px 5px;border-radius:3px">djroles.json</code>) to persist across restarts</li>
+            <li><strong style="color:var(--text)">Session data</strong> — login sessions are stored in files on the server to keep you logged into the dashboard for up to 1 year unless you log out</li>
           </ul>
         </section>
 
@@ -1592,16 +1592,16 @@ app.get('/privacy', (req, res) => {
 
         <section>
           <div class="card-title" style="margin-bottom:8px">5. Data Storage & Security</div>
-          <p>Session files are stored on the server hosting AudioQuack. Playback history and liked songs exist only in memory and are not written to disk â€” they will be cleared whenever the bot restarts. We take reasonable precautions to protect stored data, but no system is completely secure. Use of the service is at your own risk.</p>
+          <p>Session files are stored on the server hosting AudioQuack. Playback history and liked songs exist only in memory and are not written to disk — they will be cleared whenever the bot restarts. We take reasonable precautions to protect stored data, but no system is completely secure. Use of the service is at your own risk.</p>
         </section>
 
         <section>
           <div class="card-title" style="margin-bottom:8px">6. Third-Party Services</div>
           <p>AudioQuack interacts with the following third-party services:</p>
           <ul style="margin-top:8px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
-            <li><strong style="color:var(--text)">Discord</strong> â€” for bot functionality and OAuth2 login. Subject to <a href="https://discord.com/privacy" target="_blank" style="color:var(--gold)">Discord's Privacy Policy</a></li>
-            <li><strong style="color:var(--text)">YouTube / Google</strong> â€” audio is streamed from YouTube. Subject to <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--gold)">Google's Privacy Policy</a></li>
-            <li><strong style="color:var(--text)">Google Fonts</strong> â€” fonts are loaded from Google's CDN for the dashboard UI</li>
+            <li><strong style="color:var(--text)">Discord</strong> — for bot functionality and OAuth2 login. Subject to <a href="https://discord.com/privacy" target="_blank" style="color:var(--gold)">Discord's Privacy Policy</a></li>
+            <li><strong style="color:var(--text)">YouTube / Google</strong> — audio is streamed from YouTube. Subject to <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--gold)">Google's Privacy Policy</a></li>
+            <li><strong style="color:var(--text)">Google Fonts</strong> — fonts are loaded from Google's CDN for the dashboard UI</li>
           </ul>
         </section>
 
@@ -1611,7 +1611,7 @@ app.get('/privacy', (req, res) => {
           <ul style="margin-top:8px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
             <li><strong style="color:var(--text)">Log out</strong> at any time to clear your dashboard session</li>
             <li><strong style="color:var(--text)">Remove the bot</strong> from your server at any time via Discord server settings</li>
-            <li><strong style="color:var(--text)">Request data deletion</strong> by contacting us â€” since most data is in-memory only, a bot restart effectively clears user data</li>
+            <li><strong style="color:var(--text)">Request data deletion</strong> by contacting us — since most data is in-memory only, a bot restart effectively clears user data</li>
           </ul>
         </section>
 
@@ -1637,16 +1637,16 @@ app.get('/privacy', (req, res) => {
     </div>
   `, req.session.user ?? null, ''));
 });
-// â”€â”€ Docs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Docs ──────────────────────────────────────────────────────────────────────
 app.get('/docs', (req, res) => {
   res.send(shell('Documentation', `
     <div class="page-header">
-      <div class="page-title">ðŸ“– Documentation</div>
+      <div class="page-title">📖 Documentation</div>
       <div class="page-sub">Everything you need to know about AudioQuack</div>
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="card-title">ðŸ“‘ Table of Contents</span></div>
+      <div class="card-header"><span class="card-title">📑 Table of Contents</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:8px;font-size:.9rem">
         <a href="#installation" style="color:var(--gold)">1. Installation & Setup</a>
         <a href="#dashboard" style="color:var(--gold)">2. Using the Dashboard</a>
@@ -1657,7 +1657,7 @@ app.get('/docs', (req, res) => {
     </div>
 
     <div class="card" id="installation">
-      <div class="card-header"><span class="card-title">ðŸš€ 1. Installation & Setup</span></div>
+      <div class="card-header"><span class="card-title">🚀 1. Installation & Setup</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px;line-height:1.7;font-size:.9rem;color:var(--muted2)">
         <section>
           <div class="card-title" style="margin-bottom:8px">Adding the Bot to Your Server</div>
@@ -1668,10 +1668,10 @@ app.get('/docs', (req, res) => {
           <div class="card-title" style="margin-bottom:8px">Required Bot Permissions</div>
           <p>AudioQuack needs the following permissions to function correctly:</p>
           <ul style="margin-top:8px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
-            <li><strong style="color:var(--text)">Connect</strong> â€” to join voice channels</li>
-            <li><strong style="color:var(--text)">Speak</strong> â€” to play audio in voice channels</li>
-            <li><strong style="color:var(--text)">Send Messages</strong> â€” to send now playing and queue notifications</li>
-            <li><strong style="color:var(--text)strong">Use Application Commands</strong> â€” to register and respond to slash commands</li>
+            <li><strong style="color:var(--text)">Connect</strong> — to join voice channels</li>
+            <li><strong style="color:var(--text)">Speak</strong> — to play audio in voice channels</li>
+            <li><strong style="color:var(--text)">Send Messages</strong> — to send now playing and queue notifications</li>
+            <li><strong style="color:var(--text)strong">Use Application Commands</strong> — to register and respond to slash commands</li>
           </ul>
         </section>
         <section>
@@ -1687,7 +1687,7 @@ app.get('/docs', (req, res) => {
     </div>
 
     <div class="card" id="dashboard">
-      <div class="card-header"><span class="card-title">ðŸ–¥ï¸ 2. Using the Dashboard</span></div>
+      <div class="card-header"><span class="card-title">🖥️ 2. Using the Dashboard</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px;line-height:1.7;font-size:.9rem;color:var(--muted2)">
         <section>
           <div class="card-title" style="margin-bottom:8px">Logging In</div>
@@ -1695,15 +1695,15 @@ app.get('/docs', (req, res) => {
         </section>
         <section>
           <div class="card-title" style="margin-bottom:8px">Server List</div>
-          <p>After logging in you'll see your <strong style="color:var(--text)">Servers</strong> page â€” a grid of all Discord servers you share with AudioQuack. Servers actively playing music show a <span class="pill pill-gold" style="font-size:.72rem">ðŸŽµ Playing</span> badge. Click any server to open its music dashboard.</p>
+          <p>After logging in you'll see your <strong style="color:var(--text)">Servers</strong> page — a grid of all Discord servers you share with AudioQuack. Servers actively playing music show a <span class="pill pill-gold" style="font-size:.72rem">🎵 Playing</span> badge. Click any server to open its music dashboard.</p>
         </section>
         <section>
           <div class="card-title" style="margin-bottom:8px">Server Dashboard</div>
           <p>The server dashboard has three main areas:</p>
           <ul style="margin-top:8px;padding-left:20px;display:flex;flex-direction:column;gap:8px">
-            <li><strong style="color:var(--text)">Now Playing</strong> â€” shows the current track with thumbnail, artist, duration, and playback controls (Pause, Resume, Skip, Stop, Disconnect). Also includes a volume slider (0â€“150%).</li>
-            <li><strong style="color:var(--text)">Search & Play</strong> â€” search YouTube directly from the dashboard or paste a URL. Results appear as cards you can play or like instantly.</li>
-            <li><strong style="color:var(--text)">Queue</strong> â€” view the upcoming tracks, reorder by shuffling, set loop mode, and remove individual tracks with the âœ• button.</li>
+            <li><strong style="color:var(--text)">Now Playing</strong> — shows the current track with thumbnail, artist, duration, and playback controls (Pause, Resume, Skip, Stop, Disconnect). Also includes a volume slider (0–150%).</li>
+            <li><strong style="color:var(--text)">Search & Play</strong> — search YouTube directly from the dashboard or paste a URL. Results appear as cards you can play or like instantly.</li>
+            <li><strong style="color:var(--text)">Queue</strong> — view the upcoming tracks, reorder by shuffling, set loop mode, and remove individual tracks with the ✕ button.</li>
           </ul>
           <p style="margin-top:10px"><strong style="color:var(--text)">Note:</strong> The bot must already be in a voice channel (started via <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">/play</code> in Discord) before you can control it from the dashboard.</p>
         </section>
@@ -1713,20 +1713,20 @@ app.get('/docs', (req, res) => {
         </section>
         <section>
           <div class="card-title" style="margin-bottom:8px">History</div>
-          <p>The <strong style="color:var(--text)">History</strong> page tracks the last 50 songs you've played through AudioQuack. Tracks are recorded per-user and stored in memory â€” they reset when the bot restarts. Click <strong style="color:var(--text)">Open on YouTube</strong> to revisit any track.</p>
+          <p>The <strong style="color:var(--text)">History</strong> page tracks the last 50 songs you've played through AudioQuack. Tracks are recorded per-user and stored in memory — they reset when the bot restarts. Click <strong style="color:var(--text)">Open on YouTube</strong> to revisit any track.</p>
         </section>
         <section>
           <div class="card-title" style="margin-bottom:8px">Liked Songs</div>
-          <p>You can <strong style="color:var(--text)">â™¥ Like</strong> any track from the search results on a server dashboard. Liked songs are stored per-user (up to 100 tracks) and accessible from the sidebar. Unlike a song at any time with the âœ• Unlike button.</p>
+          <p>You can <strong style="color:var(--text)">♥ Like</strong> any track from the search results on a server dashboard. Liked songs are stored per-user (up to 100 tracks) and accessible from the sidebar. Unlike a song at any time with the ✕ Unlike button.</p>
         </section>
       </div>
     </div>
 
     <div class="card" id="commands">
-      <div class="card-header"><span class="card-title">âŒ¨ï¸ 3. Bot Commands</span></div>
+      <div class="card-header"><span class="card-title">⌨️ 3. Bot Commands</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:0;font-size:.88rem">
         ${[
-          ['/play [query]', 'Plays a Song via AQ by name or URL. Supports autocomplete â€” type a few letters and suggestions appear.', false],
+          ['/play [query]', 'Plays a Song via AQ by name or URL. Supports autocomplete — type a few letters and suggestions appear.', false],
           ['/skip', 'Skip the currently playing track and move to the next one in the queue.', false],
           ['/pause', 'Pause playback. The bot stays in the channel.', false],
           ['/resume', 'Resume paused playback.', false],
@@ -1759,7 +1759,7 @@ app.get('/docs', (req, res) => {
     </div>
 
     <div class="card" id="dj">
-      <div class="card-header"><span class="card-title">ðŸŽ§ 4. DJ Role System</span></div>
+      <div class="card-header"><span class="card-title">🎧 4. DJ Role System</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px;line-height:1.7;font-size:.9rem;color:var(--muted2)">
         <section>
           <div class="card-title" style="margin-bottom:8px">How It Works</div>
@@ -1787,16 +1787,16 @@ app.get('/docs', (req, res) => {
     </div>
 
     <div class="card" id="faq">
-      <div class="card-header"><span class="card-title">â“ 5. FAQ</span></div>
+      <div class="card-header"><span class="card-title">❓ 5. FAQ</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px;line-height:1.7;font-size:.9rem;color:var(--muted2)">
         ${[
           ['Why isn\'t the bot joining my voice channel?', 'Make sure you\'re in a voice channel before using /play. The bot needs Connect and Speak permissions in that channel. If it still doesn\'t join, try /disconnect and then /play again.'],
           ['Why can\'t I control music from the dashboard?', 'The bot must be actively in a voice channel in Discord first. Start playback with /play in Discord, then use the dashboard to control it.'],
-          ['Why does my history reset?', 'History and liked songs are stored in memory for performance reasons and reset when the bot restarts. This is by design â€” see the Privacy Policy for details.'],
-          ['The bot left the voice channel on its own â€” why?', 'AudioQuack automatically disconnects 30 seconds after the queue finishes to avoid sitting idle in channels.'],
+          ['Why does my history reset?', 'History and liked songs are stored in memory for performance reasons and reset when the bot restarts. This is by design — see the Privacy Policy for details.'],
+          ['The bot left the voice channel on its own — why?', 'AudioQuack automatically disconnects 30 seconds after the queue finishes to avoid sitting idle in channels.'],
           ['Can I use the dashboard without being in the server?', 'No. The dashboard only shows servers you share with the bot. You must be a member of the server to access its dashboard.'],
-          ['Volume above 100% â€” is that safe?', 'Yes, up to 150% is supported but may cause audio distortion at high levels depending on the source. 80% (default) is recommended for most use cases.'],
-          ['Why did my liked songs disappear?', 'Liked songs are stored in memory and are lost on bot restart. This is a known limitation â€” persistent storage may be added in a future update.'],
+          ['Volume above 100% — is that safe?', 'Yes, up to 150% is supported but may cause audio distortion at high levels depending on the source. 80% (default) is recommended for most use cases.'],
+          ['Why did my liked songs disappear?', 'Liked songs are stored in memory and are lost on bot restart. This is a known limitation — persistent storage may be added in a future update.'],
           ['How do I report a bug or get support?', 'Join the AudioQuack Discord support server or reach out through the dashboard contact options.'],
         ].map(([q, a]) => `
           <section>
@@ -1809,9 +1809,9 @@ app.get('/docs', (req, res) => {
 });
 
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 //  BOT BOOT
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 client.commands = new Collection();
 for (const cmd of commands) client.commands.set(cmd.data.name, cmd);
 
@@ -1820,19 +1820,19 @@ async function registerCommands() {
   try {
     if (process.env.GUILD_ID) {
       await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: commands.map(c => c.data.toJSON()) });
-      console.log('âœ… Guild commands registered');
+      console.log('✅ Guild commands registered');
     } else {
       await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands.map(c => c.data.toJSON()) });
-      console.log('âœ… Global commands registered (~1hr propagation)');
+      console.log('✅ Global commands registered (~1hr propagation)');
     }
-  } catch (err) { console.error('âŒ Failed to register commands:', err); }
+  } catch (err) { console.error('❌ Failed to register commands:', err); }
 }
 
 client.once('ready', async () => {
-  console.log(`\nðŸ¦† AudioQuack online as ${client.user.tag}`);
+  console.log(`\n🦆 AudioQuack online as ${client.user.tag}`);
   client.user.setPresence({ activities: [{ name: 'aqmusic.qzz.io', type: ActivityType.Watching }], status: 'online' });
   await registerCommands();
-  console.log('âœ… Bot ready!');
+  console.log('✅ Bot ready!');
 });
 
 client.on('interactionCreate', async interaction => {
@@ -1847,8 +1847,8 @@ client.on('interactionCreate', async interaction => {
   try {
     await cmd.execute(interaction);
   } catch (err) {
-    console.error(`âŒ /${interaction.commandName}:`, err);
-    const payload = { embeds: [simple('âŒ Something went wrong.', C.red)], ephemeral: true };
+    console.error(`❌ /${interaction.commandName}:`, err);
+    const payload = { embeds: [simple('❌ Something went wrong.', C.red)], ephemeral: true };
     if (interaction.replied || interaction.deferred) await interaction.followUp(payload);
     else await interaction.reply(payload);
   }
@@ -1856,4 +1856,4 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-app.listen(PORT, () => console.log(`ðŸŒ Dashboard running on port ${PORT} â†’ ${DASHBOARD_URL}`));
+app.listen(PORT, () => console.log(`🌐 Dashboard running on port ${PORT} → ${DASHBOARD_URL}`));
