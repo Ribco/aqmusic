@@ -72,7 +72,7 @@ const axios   = require('axios');
 
 const app  = express();
 const PORT = 5113;
-const DASHBOARD_URL = 'https://dash.aqmusic.qzz.io';
+const DASHBOARD_URL = 'https://dash.aqmusic.app';
 const DISCORD_API   = 'https://discord.com/api/v10';
 
 // In-memory stores (per-user history & liked songs)
